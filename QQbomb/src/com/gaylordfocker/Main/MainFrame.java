@@ -15,7 +15,7 @@ import com.gaylordfocker.dialog.QQDialog;
 import com.gaylordfocker.dialog.SettingDialogFactory;
 
 /**
- * 没啥好写的呀
+ * 
  * @author GaylordFocker
  *
  */
@@ -32,6 +32,7 @@ public class MainFrame extends JFrame{
 	
 	public final String version = "1.0";
 	
+	//管理任务面板（用于在移除时将被移除的面板以下的面板上移）
 	private ArrayList<QQDialog> dialogs = new ArrayList<QQDialog>();
 	
 	public MainFrame() {
@@ -66,7 +67,7 @@ public class MainFrame extends JFrame{
 			}
 			factory = new SettingDialogFactory(this);//省事，反正有GC
 			QQDialog d = factory.createSettingDialog(dialogs.size());
-			if(d==null) {
+			if(d==null) {//用户关闭窗口则返回null
 				return;
 			}
 			d.setRemoveAction((a)->{
@@ -80,6 +81,8 @@ public class MainFrame extends JFrame{
 							e1.printStackTrace();
 						}
 						centerPn.remove(d);
+						
+						//此任务面板以下的任务面板都上移一位
 						for(int i = d.getSequence();i<dialogs.size();i++) {
 							dialogs.get(i).turnUp();
 						}

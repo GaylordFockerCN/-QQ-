@@ -15,13 +15,13 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class QQDialog extends JPanel implements Runnable{
 
-	private String enemyName,message;
+	private String enemyName,message;//轰炸对象名称，轰炸的内容
 	
 	public final int WIDTH = 300,HEIGHT = 30;
 	
-	private int times,cnt = 0,sequence,i;
+	private int times,cnt = 0,sequence,i;//轰炸次数，当前完成的轰炸次数，此任务的序号，预备的时候用的计数器
 	
-	private long period;
+	private long period;//轰炸间隔
 	
 	private JButton stopOrContinueBtn,resetBtn,removeBtn;
 	
@@ -46,7 +46,7 @@ public class QQDialog extends JPanel implements Runnable{
 		this.times = times;
 		this.sequence = sequence;
 		setBounds(0,HEIGHT*sequence,WIDTH,HEIGHT);
-		initPanel();
+		initPanel();//初始化面板
 		thread = new Thread(this);
 	}
 	
@@ -62,9 +62,9 @@ public class QQDialog extends JPanel implements Runnable{
 			while(cnt<times) {
 				cnt++;
 				Thread.sleep(period);
-				
+				//核心部分：调用hz.exe完成单次轰炸
 				Process p;
-				if(message != null){
+				if(message != null){//如果信息为null则调用剪贴板
 					if(!new File("config/hz.exe").exists()) {
 							JOptionPane.showMessageDialog(null, "hz.exe不存在!无法完成轰炸!", 
 									"错误！", JOptionPane.ERROR_MESSAGE);
@@ -78,7 +78,7 @@ public class QQDialog extends JPanel implements Runnable{
 					p = Runtime.getRuntime().exec("hz_paste "+enemyName);
 				}
 				
-				if(p.waitFor()!=0) {
+				if(p.waitFor()!=0) {//轰炸成功则返回0，窗口不存在则返回1
 					JOptionPane.showMessageDialog(null, "轰炸对象“"+enemyName+"”不存在!", 
 							"错误！", JOptionPane.ERROR_MESSAGE);
 					stop();
@@ -86,6 +86,7 @@ public class QQDialog extends JPanel implements Runnable{
 				
 				timesLb.setText(cnt+"/"+times);
 			}
+			
 			cnt = 0;
 			timesLb.setText("完成。");
 			stopOrContinueBtn.setIcon(continueIcon);
@@ -134,7 +135,7 @@ public class QQDialog extends JPanel implements Runnable{
 		stopOrContinueBtn.setBounds(200, 2, 25, 25);
 		stopOrContinueBtn.setToolTipText("启动");
 		stopOrContinueBtn.addActionListener((e)->{
-			if(thread.isAlive()) {
+			if(thread.isAlive()) {//线程存活的话单机则杀死并更新图标，线程是死的话则新建线程并更新图标
 				stop();
 			}else {
 				stopOrContinueBtn.setIcon(stopIcon);
@@ -152,7 +153,7 @@ public class QQDialog extends JPanel implements Runnable{
 		resetBtn.addActionListener((e)->{
 			cnt = 0;
 			i=5;
-			stop();
+			stop();//重置时先杀死线程
 			timesLb.setText(cnt+"/"+times);
 		});
 		add(resetBtn);
@@ -178,23 +179,42 @@ public class QQDialog extends JPanel implements Runnable{
 //		}).start();
 	}
 	
+	/**
+	 * 此方法用来设置移除按钮点击事件，因为需要获取父组件才能将自己移除，
+	 * 因为需要将此任务面板以下的任务面板上移所以事件响应需在父组件中完成。
+	 * @param al 父组件移除此面板所需的事件监听器
+	 */
 	public void setRemoveAction(ActionListener al) {
 		
 		removeBtn.addActionListener((e)->{
 			stop();
 			al.actionPerformed(e);
 		});
+		
 	}
 	
+	/**
+	 * 获取此面板的序号，便于父组件将此序号以上的面板上移
+	 * @return 此面板的序号
+	 */
 	public int getSequence() {
 		return sequence;
 	}
 	
+	/**
+	 * 将此面板上移。<br>
+	 * sequence--;序号减一<br>
+	 * setBounds(0,HEIGHT*sequence,WIDTH,HEIGHT);纵坐标减去一个单位
+	 */
 	public void turnUp() {
 		sequence--;
 		setBounds(0,HEIGHT*sequence,WIDTH,HEIGHT);
 	}
 	
+	/**
+	 * 重写方法，方便在父面板中判断是否有重复轰炸对象的任务
+	 * @return 如果两个面板中轰炸对象相同则返回true
+	 */
 	@Override
 	public boolean equals(Object o) {
 		return (o instanceof QQDialog)&&

@@ -1,5 +1,7 @@
 package com.gaylordfocker.dialog;
 
+import java.awt.Frame;
+
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -9,8 +11,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
-
-import com.gaylordfocker.Main.MainFrame;
 
 @SuppressWarnings("serial")
 public class SettingDialogFactory extends JDialog{
@@ -31,8 +31,8 @@ public class SettingDialogFactory extends JDialog{
 	
 	private QQDialog qqdialog;
 	
-	public SettingDialogFactory(MainFrame mf) {
-		super(mf,"新建",true);
+	public SettingDialogFactory(Frame owner) {
+		super(owner,"新建",true);
 		setSize(WIDTH, HEIGHT);
 		setLocationRelativeTo(null);
 		setLayout(null);
@@ -43,6 +43,7 @@ public class SettingDialogFactory extends JDialog{
 		okBtn = new JButton("确定");
 		okBtn.setBounds(64, 170, 60, 30);
 		okBtn.addActionListener((e)->{
+			//按下按钮后判断输入是否合法，合法则构造出QQDialog对象并返回
 			try {
 
 				if(enemyNameTf.getText().equals("")) {
@@ -140,7 +141,9 @@ public class SettingDialogFactory extends JDialog{
 		
 	}
 	/**
-	 * 
+	 * 利用Dialog在设置可见后会阻塞父窗口的线程，在设置不可见后才继续父窗口的线程<br>
+	 * 设置可见后等待用户按下“确定”按钮后便继续原来线程，按下确定后qqdialog已经被实例化<br>
+	 * 参见initPane中okBtn的addActionListener方法中的注释。
 	 * @param sequence 构造出的QQDialog的序号
 	 * @return 由对话框填写的内容构造的QQDialog对象，如果对话框被关闭则返回null。
 	 */
@@ -150,6 +153,7 @@ public class SettingDialogFactory extends JDialog{
 		return qqdialog;
 	}
 	
+	//调试用
 	public static void main(String[] args) {
 		new SettingDialogFactory(null).setVisible(true);
 	}
